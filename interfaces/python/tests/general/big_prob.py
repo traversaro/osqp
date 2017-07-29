@@ -51,8 +51,16 @@ q /= 100
 # q *= 2000
 
 
+<<<<<<< HEAD
 osqp_opts = {'rho': rho,
              #  'auto_rho': True,
+||||||| merged common ancestors
+osqp_opts = {'rho': 0.1,
+            #  'auto_rho': True,
+=======
+osqp_opts = {'rho_ineq': 0.1,
+            #  'auto_rho': True,
+>>>>>>> All tests pass in C, Matlab and Python
              'sigma': 1e-06,
             #  'eps_rel': 1e-05,
             #  'eps_abs': 1e-05,
