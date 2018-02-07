@@ -258,6 +258,15 @@ include_directories(${linsys_solvers_includes})
 
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
+include(GNUInstallDirs)
+
+install(TARGETS osqpstatic
+        EXPORT  ${PROJECT_NAME}
+        LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"                            COMPONENT shlib
+        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"                            COMPONENT lib
+        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}"                            COMPONENT bin)
+
+install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
@@ -275,11 +284,49 @@ if (NOT PYTHON AND NOT MATLAB)
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
+    install(TARGETS osqp
+            EXPORT  ${PROJECT_NAME}
+            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"                            COMPONENT shlib
+            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"                            COMPONENT lib
+            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}"                            COMPONENT bin)
+
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
 endif (NOT PYTHON AND NOT MATLAB)
+
+# Create CMake packages
+# ----------------------------------------------
+include(CMakePackageConfigHelpers)
+
+export(EXPORT ${PROJECT_NAME}
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
+  NAMESPACE osqp::
+)
+
+set(ConfigPackageLocation lib/cmake/osqp)
+install(EXPORT ${PROJECT_NAME}
+  FILE
+    osqp-targets.cmake
+  NAMESPACE
+    osqp::
+  DESTINATION
+    ${ConfigPackageLocation}
+)
+
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake "include(\"${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\"\n")
+endif()
+
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
+  DESTINATION
+    ${ConfigPackageLocation}
+  COMPONENT
+    Devel
+)
 
 
 # Add testing
